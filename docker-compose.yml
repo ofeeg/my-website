@@ -1,0 +1,43 @@
+#This is an example of what I used for containerizing everything to host this website with. I made directories with Containerfiles/Dockerfiles named the same way as the
+# build variables.
+services:
+ db:
+  build: ./db
+  container_name: db
+  ports:
+   - "3117:3117"
+  volumes:
+   - ./db_data:/var/lib/mysql
+  environment:
+   MYSQL_ROOT_PASSWORD: password
+   MYSQL_DATABASE: webserver
+   MYSQL_USER: webserver
+   MYSQL_PASSWORD: password
+  networks:
+   website_network:
+    aliases:
+     - webserver
+ nginx:
+  build: ./nginx
+  container_name: nginx
+  ports:
+   - "8080:80"
+  volumes:
+   - ./website:/usr/share/nginx/html
+  networks:
+   website_network:
+    aliases:
+     - nginx-proxy
+ cloduflare:
+  build: ./cloudflare
+  container_name: cloudflare
+  command: tunnel run
+  environment:
+  - TUNNEL_TOKEN=mytoken
+networks:
+ website_network:
+  name: website_network
+volumes:
+ db_data:
+  driver: local
+  name: db_data
